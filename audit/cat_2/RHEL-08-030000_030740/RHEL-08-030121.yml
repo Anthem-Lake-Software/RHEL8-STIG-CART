@@ -1,0 +1,16 @@
+{{ if .Vars.RHEL_08_030121 }}
+command:
+  auditd_conf_e2:
+    title: RHEL-08-030121 | RHEL 8 audit system must protect auditing rules from unauthorized change.
+    exec: grep -i '-e 2' /etc/audit/audit.rules
+    exit-status: 0
+    stdout:
+    - '/^-e 2/'
+    meta:
+      Cat: 2
+      CCI: CCI-000162
+      Group_Title: SRG-OS-000057-GPOS-00027
+      Rule_ID: SV-230402r627750_rule
+      STIG_ID: RHEL-08-030121
+      Vul_ID: V-230402
+{{ end }}

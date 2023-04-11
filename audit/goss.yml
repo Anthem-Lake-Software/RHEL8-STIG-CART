@@ -1,0 +1,33 @@
+gossfile:
+  {{ if .Vars.rhel8stig_cat1 }}
+  cat_1/*.yml: {}
+  {{ end }}
+
+  {{ if .Vars.rhel8stig_cat2 }}
+  cat_2/RHEL-08-010000_010830/*.yml: {}
+  cat_2/RHEL-08-020000_020353/*.yml: {}
+  cat_2/RHEL-08-030000_030740/*.yml: {}
+  cat_2/RHEL-08-040000_040390/*.yml: {}
+  {{ end }}
+
+  {{ if .Vars.rhel8stig_cat3 }}
+  cat_3/*.yml: {}
+  {{ end }}
+
+command:
+  benchmark_meta:
+    title: Benchmark MetaData
+    exec: echo BenchMark MetaData
+    exit-status: 0
+    meta:
+      host_machine_uuid: {{ .Vars.machine_uuid }}
+      host_epoch: {{ .Vars.epoch }}
+      host_os_locale: {{ .Vars.os_locale }}
+      host_os_release: {{ .Vars.os_release }}
+      host_os_distribution: {{ .Vars.os_distribution }}
+      host_automation_group: {{ .Vars.auto_group }}
+      host_hostname: {{ .Vars.os_hostname }}
+      host_system_type: {{ .Vars.system_type }}
+      benchmark_type: {{ .Vars.benchmark_type }}
+      benchmark_version: {{ .Vars.benchmark_version }}
+      benchmark_os: {{ .Vars.benchmark_os }}

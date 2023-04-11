@@ -1,0 +1,20 @@
+{{ if .Vars.RHEL_08_010830 }}
+command:
+  sshd_config_permit_userenv:
+    title: RHEL-08-010830 | RHEL 8 must not allow users to override SSH environment variables.
+    exec: grep PermitUser /etc/ssh/sshd_config /etc/sshd/conf.d
+    exit-status:
+      or:
+      - 0
+      - 2
+    stdout:
+    - '/.*:PermitUserEnvironment [Nn][Oo]/'
+    - '!/.*:PermitUserEnvironment\s+[Yy][Ee][Ss]/'
+    meta:
+      Cat: 2
+      CCI: CCI-000366
+      Group_Title: SRG-OS-000480-GPOS-00229
+      Rule_ID: SV-230330r646870_rule
+      STIG_ID: RHEL-08-010830
+      Vul_ID: V-230330
+{{ end }}

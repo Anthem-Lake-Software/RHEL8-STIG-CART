@@ -1,0 +1,29 @@
+{{ if .Vars.RHEL_08_030070 }}
+command:
+  audit_log_perms:
+    title: RHEL-08-030070 | RHEL 8 audit logs must have a mode of 0600 or less permissive to prevent unauthorized read access. | file permissions
+    exec: stat -c "%a" /var/log/audit/audit.log
+    exit-status: 0
+    stdout:
+    - "600"
+    meta:
+      Cat: 2
+      CCI: CCI-000162
+      Group_Title: SRG-OS-000057-GPOS-00027
+      Rule_ID: SV-230396r627750_rule
+      STIG_ID: RHEL-08-030070
+      Vul_ID: V-230396
+  audit_conf_log_group:
+     title: RHEL-08-030070 | RHEL 8 audit logs must have a mode of 0600 or less permissive to prevent unauthorized read access. | auditd conf
+     exec: grep log_group /etc/audit/auditd.conf
+     exit-status: 0
+     stdout:
+     - '/^log_group = root/'
+     meta:
+      Cat: 2
+      CCI: CCI-000162
+      Group_Title: SRG-OS-000057-GPOS-00027
+      Rule_ID: SV-230396r627750_rule
+      STIG_ID: RHEL-08-030070
+      Vul_ID: V-230396
+{{ end }}
