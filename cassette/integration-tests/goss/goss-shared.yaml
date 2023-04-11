@@ -1,0 +1,282 @@
+---
+command:
+  echo 'hi':
+    exit-status: 0
+    stdout:
+    - hi
+    stderr: []
+  foobar:
+    exit-status: 127
+    stdout: []
+    stderr:
+    - not found
+  command-override:
+    exec: true
+    exit-status: 0
+  commandskip:
+    exec: false
+    exit-status: 0
+    skip: true
+file:
+{{range mkSlice "/etc/PAsswD" "/etc/group"}}
+  {{. | toLower}}:
+    exists: true
+    mode: '0644'
+    owner: root
+    group: root
+    filetype: file
+    contains:
+    - root
+{{end}}
+  "/goss/hellogoss.txt":
+    exists: true
+    md5: 7c9bb14b3bf178e82c00c2a4398c93cd
+    sha256: 7f78ce27859049f725936f7b52c6e25d774012947d915e7b394402cfceb70c4c
+    sha512: 372864ab83187de41ca57c5c77cd4a99220ccadc8b8ddb18367893fd3e58764193a599edbf63a48c0c44f1e923606a00929b46de3bda1744fd722b9d42829206
+  "/tmp/goss/foobar":
+    exists: false
+    contains: []
+  "~root":
+    exists: true
+    mode: '0700'
+  "/tmp":
+    exists: true
+    mode: '1777'
+  "/dev/random":
+    exists: true
+    filetype: character-device
+  "/pipe":
+    exists: true
+    filetype: pipe
+  "/does/not/exist":
+    exists: true
+    contains:
+    - skip-this-test
+    skip: true
+package:
+  foobar:
+    installed: false
+{{- range $name, $ver := index .Vars .Env.OS "packages"}}
+  {{$name}}:
+    installed: true
+    versions:
+    - {{$ver}}
+{{end}}
+addr:
+  tcp://google.com:22:
+    reachable: false
+    timeout: 1000
+  tcp://google.com:443:
+    reachable: true
+    timeout: 5000
+  tcp://google.com:80:
+    reachable: false
+    timeout: 5000
+    local-address: 127.0.0.1
+port:
+  tcp:9999:
+    listening: false
+user:
+  root:
+    exists: true
+  foobar:
+    exists: false
+group:
+  foobar:
+    exists: false
+dns:
+  CAA:dnstest.io:
+    resolvable: true
+    addrs:
+    - 0 issue comodoca.com
+    - 0 issue letsencrypt.org
+    - 0 issuewild ;
+    timeout: 2000
+    server: 8.8.8.8
+  CNAME:c.dnstest.io:
+    resolvable: true
+    addrs:
+    - a.dnstest.io.
+    timeout: 2000
+    server: 8.8.8.8
+  c.dnstest.io:
+    resolvable: true
+    addrs:
+    - 192.30.252.153
+    timeout: 2000
+    server: 8.8.8.8:53
+  MX:dnstest.io:
+    resolvable: true
+    addrs:
+    - 10 b.dnstest.io.
+    - 5 a.dnstest.io.
+    timeout: 2000
+    server: 8.8.8.8:53
+  NS:dnstest.io:
+    resolvable: true
+    addrs:
+    - ns1.dnstest.io.
+    - ns2.dnstest.io.
+    timeout: 2000
+    server: 8.8.8.8
+  PTR:54.243.154.1:
+    resolvable: true
+    addrs:
+    - ec2-54-243-154-1.compute-1.amazonaws.com.
+    timeout: 2000
+    server: 8.8.8.8
+  SRV:_https._tcp.dnstest.io:
+    resolvable: true
+    addrs:
+    - 0 5 443 a.dnstest.io.
+    - 10 10 443 b.dnstest.io.
+    timeout: 2000
+    server: 8.8.8.8
+  TXT:txt._test.dnstest.io:
+    resolvable: true
+    addrs:
+    - Hello DNS
+    timeout: 2000
+    server: 8.8.8.8
+  ip6.dnstest.io:
+    resolvable: true
+    addrs:
+    - 2404:6800:4001:807::200e
+    timeout: 2000
+    server: 8.8.8.8
+  localhost:
+    resolvable: true
+    addrs:
+    - 127.0.0.1
+    timeout: 2000
+  dnstest.io:
+    resolvable: true
+    server: 8.8.8.8
+    timeout: 2000
+process:
+  foobar:
+    running: false
+kernel-param:
+  kernel.ostype:
+    value: Linux
+mount:
+  "/dev":
+    exists: true
+    opts:
+    - rw
+    - nosuid
+    source: tmpfs
+    filesystem: tmpfs
+  "/":
+    exists: true
+    usage:
+      and:
+        - lt: 95
+        - gt: 0
+interface:
+  eth0:
+    exists: true
+    addrs:
+      contain-element:
+        have-prefix: '172.17'
+http:
+  {{ if index .Vars .Env.OS "proxy" }}
+  https://httpbin.org/anything:
+    status: 200
+    proxy: {{ index .Vars .Env.OS "proxy" }}
+  {{ end }}
+  https://httpbin.org/headers:
+    status: 200
+    allow-insecure: false
+    timeout: 5000
+    request-headers:
+      - "Foo: bar"
+    headers: ["Content-Type: application/json"]
+    body: ['"Foo": "bar"']
+  https://httpbin.org/headers?host:
+    status: 200
+    allow-insecure: false
+    timeout: 5000
+    request-headers:
+      # This is causing intermittent errors depending on the httpbin server hit
+      # need to see if there's a good way around this, maybe local httpbin?
+      #- "Host: example.com"
+      - "Host: httpbin.org"
+    headers: ["Content-Type: application/json"]
+    # body: ['"Host": "example.com"']
+    body: ['"Host": "httpbin.org"']
+  https://httpbin.org/basic-auth/username/secret:
+    status: 200
+    username: username
+    password: secret
+  https://httpbin.org/basic-auth/username/secret?failure:
+    status: 401
+    username: username
+    password: wrong
+  https://httpbin.org/put:
+    status: 200
+    method: PUT
+    request-body: '{"key": "value"}'
+    body:
+      - '"key": "value"'
+  anything-with-get:
+    url: https://httpbin.org/anything
+    status: 200
+    body: []
+  anything-with-put:
+    url: https://httpbin.org/anything
+    status: 200
+    method: GET
+    request-body: "request-body"
+    body: ["request-body"]
+matching:
+  has_substr:
+    content: some string
+    matches:
+      match-regexp: some str
+  has_2:
+    content:
+      - 2
+    matches:
+      contain-element: 2
+  has_foo_bar_and_baz:
+    content:
+      foo: bar
+      baz: bing
+    matches:
+      and:
+        - have-key-with-value:
+            foo: bar
+        - have-key: baz
+  semver:
+    content:
+      - 1.0.1
+      - 1.9.9
+    matches:
+      semver-constraint: ">1.0.0 <2.0.0 !=1.5.0"
+  semver2:
+    content:
+      - 1.0.1
+      - 1.5.0
+      - 1.9.9
+    matches:
+      not:
+        semver-constraint: ">1.0.0 <2.0.0 !=1.5.0"
+  vars_inline_simple:
+    content: {{ .Vars.inline }}
+    matches:
+      match-regexp: bar
+  vars_inline_overwrite:
+    content: {{ .Vars.overwrite }}
+    matches:
+      match-regexp: bar
+  sping_basic:
+    content: {{ "hello!" | upper | repeat 5 }}
+    matches:
+      match-regexp: "HELLO!HELLO!HELLO!HELLO!HELLO!"
+gossfile:
+  "nonexistent-file.yaml":
+    skip: true
+  bypath:
+    file: "goss-dummy.yaml"
+

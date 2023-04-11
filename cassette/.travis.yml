@@ -1,0 +1,62 @@
+---
+env:
+  global:
+    - secure: IH/xOtRl9rcek+YTz1s2lv2njdV1gob0AY21/kGhqUBH2sdztQ/02CteGz5E0c+LfqoUYQglLsejVCNLXQJI39CyZRzysB1wlVOz7YIPNaOLATtMGg0/8Mb7dpeqAV1u3agIi87q3ims1EkmGE9UGNj/qL75oTXBiozEfkbcsheH3Ju9CcO0i006UlNqAG4T++l1JZ4kPmr1r5eNjRu52oWQrlxaOYpZJGnT3qjxkvxcnI/Pgiem0+2aZ7Yluu0lA7UCFWyORoDRUz4pQR3uDG4ADPG4WcpJ601LDZyWtS7EOXVBgWZX9vV9ZVx63nK5w0W8NN6PQOuz0niN9iwR+FsShrPIsh6P9wVZfGifwXK4g2FL2XMBRuZCsQfrpRY6JbnuyGeMqN53ta95y0Yv4H65UQ7bulr4Lnic4+W52G/fl1VUYX8Bts+ecUydIu+afcDZ6GkpVLEURjaek99uO5ewHH7lfVAOQv4wUP8GFUyLXJumJZHvMzyiAXsTHdUZdm+Ap8EPzWFYYnMxySU39MEkIvhfG47X6sA7zAppuoNwd8vU4ZaxSdsme2InUSalETGJZ7ohL+M/tkTMyuyq8uLMRuwscNdgcCjGaHM19NQMrv4nsPmmzTeiDRoFk2wad07Mgsjy07esxw52rs3zAsa37+h74GYFWYo523AiYjw=
+
+language: go
+
+go:
+  - 1.20.x
+
+os:
+  - osx
+  - linux
+  - windows
+
+dist: trusty
+osx_image: xcode12.2
+
+services:
+  - docker
+
+before_install:
+  - if [[ "${TRAVIS_OS_NAME}" == "windows" ]]; then choco install make; fi
+  # bash from macOS is too old to have readarray. Install newer version.
+  - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install bash; fi
+
+install:
+  - ./ci/install.sh
+
+before_script:
+  - ./ci/before-build.sh
+
+script:
+  - ./ci/build.sh
+
+after_script:
+  - ./ci/after-build.sh
+
+deploy:
+  provider: releases
+  api_key:
+    secure: ijNltjw/mIHIOx8vLZ6asUun3SbY7D+XZbs5NX8vcIv0jvOiwaaT1hqny7SQBHfGZzqHsYUSS/GYAYJdBqKFFfGmTZsl90hFT6D0RGdz9C71UVxNFX4wQ5KQ/WVvdMT2SrLymGvu9TvoU0VG8OWqWVdxSlUPf6qOTGAagrzg+Tbsbb6czeiG67mlBBL23XSlfMG1p45UxzvI41SZj2R3ElUb0hym1CrFaoC36PBGrb0x41TXzvd8J7cu6xDzgczYhnYQQZpS6f2YcqNV1z0f+P67EQqQiDWIIcK2jE/YG+RgM8cbpLMiMec8CDiwNCsejBA5EbVMlGJlODvBXT5NmMBeugueqfSHEfkl5qZTQG4AOAT7UsqbnM7r0NqzmaE5Lj90igvJK6rNsH1ZRe79WfSsTtuzlkkouHGvyoz0M8gnMSzpbbwoyIy+UT0hhPMoZvIpXfr43en5WkbkPKfop0p4Vjc8NGg0iD45q1JAvIVTtz/WvWTknM1P8e3u+TiDTaZkcJJmFaBqgaeLoWktOGfi54p9nhgQnSyBYt4PyvhWDQs7QFmX0BdKlqJCESvUOJTe1t6zJJsV7Gn/3sGCN7JUEwbnXTsCoMjjFFUvQdm0Ur7t7/2xU3kO+dyfqcdM/5SYFeppQcjHI0ckhI51mIoBTsJsGvaVwKKL1I4cyBU=
+  file:
+    - release/goss-alpha-darwin-amd64
+    - release/goss-alpha-darwin-amd64.sha256
+    - release/goss-linux-amd64
+    - release/goss-linux-amd64.sha256
+    - release/goss-linux-386
+    - release/goss-linux-386.sha256
+    - release/goss-linux-arm
+    - release/goss-linux-arm.sha256
+    - release/goss-linux-arm64
+    - release/goss-linux-arm64.sha256
+    - release/goss-alpha-windows-amd64.exe
+    - release/goss-alpha-windows-amd64.exe.sha256
+    - extras/dgoss/dgoss
+    - extras/dgoss/dgoss.sha256
+  skip_cleanup: true
+  on:
+    repo: goss-org/goss
+    tags: true
+    condition: $TRAVIS_OS_NAME = linux
